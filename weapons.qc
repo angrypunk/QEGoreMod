@@ -1,5 +1,22 @@
-/*
+/*  Copyright (C) 1996-2022 id Software LLC
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+
+    See file, 'COPYING', for details.
 */
+
 void (entity targ, entity inflictor, entity attacker, float damage) T_Damage;
 void () player_run;
 void(entity bomb, entity attacker, float rad, entity ignore) T_RadiusDamage;
@@ -58,6 +75,7 @@ void() W_FireAxe =
 	else
 	{	// hit wall
 		sound (self, CHAN_WEAPON, "player/axhit2.wav", 1, ATTN_NORM);
+		//stuffcmd (self, "vibrate tactile/player/axhit2.bnvib");
 		WriteByte (MSG_BROADCAST, SVC_TEMPENTITY);
 		WriteByte (MSG_BROADCAST, TE_GUNSHOT);
 		WriteCoord (MSG_BROADCAST, org_x);
@@ -97,14 +115,14 @@ void(vector org, vector vel) SpawnMeatSpray =
 	missile.movetype = MOVETYPE_BOUNCE;
 	missile.solid = SOLID_NOT;
 
-	makevectors (self.angles);
+	makevectorsfixed(self.angles);
 
 	missile.velocity = vel;
 	missile.velocity_z = missile.velocity_z + 250 + 50*random();
 
 	missile.avelocity = '3000 1000 2000';
 	
-// set missile duration
+	// set missile duration
 	missile.nextthink = time + 1;
 	missile.think = SUB_Remove;
 
@@ -175,6 +193,7 @@ void() ApplyMultiDamage =
 {
 	if (!multi_ent)
 		return;
+
 	T_Damage (multi_ent, self, self, multi_damage);
 };
 
@@ -274,6 +293,7 @@ void() W_FireShotgun =
 	local vector dir;
 
 	sound (self, CHAN_WEAPON, "weapons/guncock.wav", 1, ATTN_NORM);	
+	//stuffcmd (self, "vibrate tactile/weapons/guncock.bnvib");
 
 	self.punchangle_x = -2;
 	
@@ -299,6 +319,7 @@ void() W_FireSuperShotgun =
 	}
 		
 	sound (self ,CHAN_WEAPON, "weapons/shotgn2.wav", 1, ATTN_NORM);	
+	//stuffcmd (self, "vibrate tactile/weapons/shotgn2.bnvib");
 
 	self.punchangle_x = -4;
 	
@@ -373,7 +394,7 @@ void() T_MissileTouch =
 		throw_blood_splat(v_forward, self.origin, other); //throw blood splat in direction nail is facing
 	}
 
-//	sound (self, CHAN_WEAPON, "weapons/r_exp3.wav", 1, ATTN_NORM);
+
 	self.origin = self.origin - 8*normalize(self.velocity);
 
 	WriteByte (MSG_BROADCAST, SVC_TEMPENTITY);
@@ -399,6 +420,7 @@ void() W_FireRocket =
 	self.currentammo = self.ammo_rockets = self.ammo_rockets - 1;
 	
 	sound (self, CHAN_WEAPON, "weapons/sgun1.wav", 1, ATTN_NORM);
+	//stuffcmd (self, "vibrate tactile/weapons/sgun1.bnvib");
 
 	self.punchangle_x = -2;
 
@@ -408,8 +430,7 @@ void() W_FireRocket =
 	missile.solid = SOLID_BBOX;
 	missile.classname = "missile";
 		
-// set missile speed	
-
+	// set missile speed	
 	makevectors (self.v_angle);
 	missile.velocity = aim(self, 1000);
 	missile.velocity = missile.velocity * 1000;
@@ -417,9 +438,10 @@ void() W_FireRocket =
 	
 	missile.touch = T_MissileTouch;
 	
-// set missile duration
+	// set missile duration
 	missile.nextthink = time + 5;
 	missile.think = SUB_Remove;
+
 	setmodel (missile, "progs/missile.mdl");
 	setsize (missile, '0 0 0', '0 0 0');		
 	setorigin (missile, self.origin + v_forward*8 + '0 0 16');
@@ -472,6 +494,7 @@ void(vector p1, vector p2, entity from, float damage) LightningDamage =
 				trace_ent.velocity_z = trace_ent.velocity_z + 400;
 		}
 	}
+
 	e1 = trace_ent;
 
 	traceline (p1 + f, p2 + f, FALSE, self);
@@ -488,6 +511,7 @@ void(vector p1, vector p2, entity from, float damage) LightningDamage =
 		}
 	
 	}
+
 	e2 = trace_ent;
 
 	traceline (p1 - f, p2 - f, FALSE, self);
@@ -510,7 +534,7 @@ void(vector p1, vector p2, entity from, float damage) LightningDamage =
 void() W_FireLightning =
 {
 	local	vector		org;
-	local	float		cells;
+	local   float           cells;
 
 	if (self.ammo_cells < 1)
 	{
@@ -519,7 +543,7 @@ void() W_FireLightning =
 		return;
 	}
 
-// explode if under water
+	// explode if under water
 	if (self.waterlevel > 1)
 	{
 		cells = self.ammo_cells;
@@ -532,12 +556,12 @@ void() W_FireLightning =
 	if (self.t_width < time)
 	{
 		sound (self, CHAN_WEAPON, "weapons/lhit.wav", 1, ATTN_NORM);
+		//stuffcmd (self, "vibrate tactile/weapons/lhit.bnvib");
 		self.t_width = time + 0.6;
 	}
+
 	self.punchangle_x = -2;
-
 	self.currentammo = self.ammo_cells = self.ammo_cells - 1;
-
 	org = self.origin + '0 0 16';
 	
 	traceline (org, org + v_forward*600, TRUE, self);
@@ -562,7 +586,6 @@ void() W_FireLightning =
 void() GrenadeExplode =
 {
 	T_RadiusDamage (self, self.owner, 120, world);
-	
 
 	WriteByte (MSG_BROADCAST, SVC_TEMPENTITY);
 	WriteByte (MSG_BROADCAST, TE_EXPLOSION);
@@ -589,7 +612,9 @@ void() GrenadeTouch =
 		GrenadeExplode();
 		return;
 	}
+
 	sound (self, CHAN_WEAPON, "weapons/bounce.wav", 1, ATTN_NORM);	// bounce sound
+
 	if (self.velocity == '0 0 0')
 		self.avelocity = '0 0 0';
 };
@@ -606,6 +631,7 @@ void() W_FireGrenade =
 	self.currentammo = self.ammo_rockets = self.ammo_rockets - 1;
 	
 	sound (self, CHAN_WEAPON, "weapons/grenade.wav", 1, ATTN_NORM);
+	//stuffcmd (self, "vibrate tactile/weapons/grenade.bnvib");
 
 	self.punchangle_x = -2;
 
@@ -634,7 +660,7 @@ void() W_FireGrenade =
 	
 	missile.touch = GrenadeTouch;
 	
-// set missile duration
+	// set missile duration
 	missile.nextthink = time + 2.5;
 	missile.think = GrenadeExplode;
 
@@ -682,10 +708,12 @@ void() W_FireSuperSpikes =
 	local vector	dir;
 	
 	sound (self, CHAN_WEAPON, "weapons/spike2.wav", 1, ATTN_NORM);
+	//stuffcmd (self, "vibrate tactile/weapons/spike2.bnvib");
 	self.attack_finished = time + 0.2;
 	self.currentammo = self.ammo_nails = self.ammo_nails - 2;
 	dir = aim (self, 1000);
 	launch_spike (self.origin + '0 0 16', dir);
+	newmis.classname = "super_spike";
 	newmis.touch = superspike_touch;
 	setmodel (newmis, "progs/s_spike.mdl");
 	setsize (newmis, VEC_ORIGIN, VEC_ORIGIN);		
@@ -712,6 +740,7 @@ void(float ox) W_FireSpikes =
 	}
 
 	sound (self, CHAN_WEAPON, "weapons/rocket1i.wav", 1, ATTN_NORM);
+	//stuffcmd (self, "vibrate tactile/weapons/rocket1i.bnvib");
 	self.attack_finished = time + 0.2;
 	self.currentammo = self.ammo_nails = self.ammo_nails - 1;
 	dir = aim (self, 1000);
@@ -737,7 +766,7 @@ void() spike_touch =
 		return;
 	}
 	
-// hit something that bleeds
+	// hit something that bleeds
 	if (other.takedamage)
 	{
 		if (random() < 0.8) //only 4 in 5 times to prevent overflows
@@ -750,16 +779,19 @@ void() spike_touch =
 		spawn_touchblood (9);
 		T_Damage (other, self, self.owner, 9);
 	}
+
 	else
 	{
 		WriteByte (MSG_BROADCAST, SVC_TEMPENTITY);
 		
-		if (self.classname == "wizspike")
+		if (self.classname == "wizard_spike")
 			WriteByte (MSG_BROADCAST, TE_WIZSPIKE);
-		else if (self.classname == "knightspike")
+
+		else if (self.classname == "knight_spike")
 			WriteByte (MSG_BROADCAST, TE_KNIGHTSPIKE);
 		else
 			WriteByte (MSG_BROADCAST, TE_SPIKE);
+
 		WriteCoord (MSG_BROADCAST, self.origin_x);
 		WriteCoord (MSG_BROADCAST, self.origin_y);
 		WriteCoord (MSG_BROADCAST, self.origin_z);
@@ -783,7 +815,7 @@ void() superspike_touch =
 		return;
 	}
 	
-// hit something that bleeds
+	// hit something that bleeds
 	if (other.takedamage)
 	{
 		if (random() < 0.8) //only 4 in 5 times to prevent overflows
@@ -821,6 +853,7 @@ PLAYER WEAPON USE
 void() W_SetCurrentAmmo =
 {
 	player_run ();		// get out of any weapon firing states
+	self.weaponframe = 0;
 
 	self.items = self.items - ( self.items & (IT_SHELLS | IT_NAILS | IT_ROCKETS | IT_CELLS) );
 	
@@ -828,62 +861,53 @@ void() W_SetCurrentAmmo =
 	{
 		self.currentammo = 0;
 		self.weaponmodel = "progs/v_axe.mdl";
-		self.weaponframe = 0;
 	}
 	else if (self.weapon == IT_SHOTGUN)
 	{
 		self.currentammo = self.ammo_shells;
 		self.weaponmodel = "progs/v_shot.mdl";
-		self.weaponframe = 0;
 		self.items = self.items | IT_SHELLS;
 	}
 	else if (self.weapon == IT_SUPER_SHOTGUN)
 	{
 		self.currentammo = self.ammo_shells;
 		self.weaponmodel = "progs/v_shot2.mdl";
-		self.weaponframe = 0;
 		self.items = self.items | IT_SHELLS;
 	}
 	else if (self.weapon == IT_NAILGUN)
 	{
 		self.currentammo = self.ammo_nails;
 		self.weaponmodel = "progs/v_nail.mdl";
-		self.weaponframe = 0;
 		self.items = self.items | IT_NAILS;
 	}
 	else if (self.weapon == IT_SUPER_NAILGUN)
 	{
 		self.currentammo = self.ammo_nails;
 		self.weaponmodel = "progs/v_nail2.mdl";
-		self.weaponframe = 0;
 		self.items = self.items | IT_NAILS;
 	}
 	else if (self.weapon == IT_GRENADE_LAUNCHER)
 	{
 		self.currentammo = self.ammo_rockets;
 		self.weaponmodel = "progs/v_rock.mdl";
-		self.weaponframe = 0;
 		self.items = self.items | IT_ROCKETS;
 	}
 	else if (self.weapon == IT_ROCKET_LAUNCHER)
 	{
 		self.currentammo = self.ammo_rockets;
 		self.weaponmodel = "progs/v_rock2.mdl";
-		self.weaponframe = 0;
 		self.items = self.items | IT_ROCKETS;
 	}
 	else if (self.weapon == IT_LIGHTNING)
 	{
 		self.currentammo = self.ammo_cells;
 		self.weaponmodel = "progs/v_light.mdl";
-		self.weaponframe = 0;
 		self.items = self.items | IT_CELLS;
 	}
 	else
 	{
 		self.currentammo = 0;
-		self.weaponmodel = "";
-		self.weaponframe = 0;
+		self.weaponmodel = string_null;
 	}
 };
 
@@ -894,32 +918,49 @@ float() W_BestWeapon =
 	it = self.items;
 
 	if (self.waterlevel <= 1 && self.ammo_cells >= 1 && (it & IT_LIGHTNING) )
-			return IT_LIGHTNING;
-	if(self.ammo_nails >= 2 && (it & IT_SUPER_NAILGUN) )
+		return IT_LIGHTNING;
+	else if(self.ammo_nails >= 2 && (it & IT_SUPER_NAILGUN) )
 		return IT_SUPER_NAILGUN;
-	if(self.ammo_shells >= 2 && (it & IT_SUPER_SHOTGUN) )
+	else if(self.ammo_shells >= 2 && (it & IT_SUPER_SHOTGUN) )
 		return IT_SUPER_SHOTGUN;
-	if(self.ammo_nails >= 1 && (it & IT_NAILGUN) )
+	else if(self.ammo_nails >= 1 && (it & IT_NAILGUN) )
 		return IT_NAILGUN;
-	if(self.ammo_shells >= 1 && (it & IT_SHOTGUN) )
+	else if(self.ammo_shells >= 1 && (it & IT_SHOTGUN) )
 		return IT_SHOTGUN;
+
 	return IT_AXE;
 };
 
-float() W_CheckNoAmmo =
+float(entity playerEnt, float old, float new) W_WantsToChangeWeapon =
 {
-	if (self.currentammo > 0)
-		return TRUE;
+	float playerFlags = CheckPlayerEXFlags(playerEnt);
+	if((playerFlags & PEF_CHANGENEVER) != 0)
+	{
+		return 0;
+	}
+	
+	if(((playerFlags & PEF_CHANGEONLYNEW) != 0) && old == new)
+	{
+		return 0;
+	}
+
+	return 1;
+};
+
+float() W_HasNoAmmo =
+{
+	if (self.currentammo)
+		return FALSE;
 
 	if (self.weapon == IT_AXE)
-		return TRUE;
+		return FALSE;	// doesnt need ammo
 	
 	self.weapon = W_BestWeapon ();
 
 	W_SetCurrentAmmo ();
 	
-// drop the weapon down
-	return FALSE;
+	// drop the weapon down
+	return TRUE;
 };
 
 /*
@@ -942,15 +983,23 @@ void() W_Attack =
 {
 	local	float	r;
 
-	if (!W_CheckNoAmmo ())
+	if ( W_HasNoAmmo() ) {
 		return;
-
-	makevectors	(self.v_angle);			// calculate forward angle for velocity
+	}
+	
+	makevectors	(self.v_angle);		// calculate forward angle for velocity
 	self.show_hostile = time + 1;	// wake monsters up
+	
+	// [NDS] haleyjd: record player attacked
+	if (self.weapon != IT_AXE)
+	{
+		self.fired_weapon = 1;
+	}
 
 	if (self.weapon == IT_AXE)
 	{
 		sound (self, CHAN_WEAPON, "weapons/ax1.wav", 1, ATTN_NORM);
+		//stuffcmd (self, "vibrate tactile/weapons/ax1.bnvib");
 		r = random();
 		if (r < 0.25)
 			player_axe1 ();
@@ -999,6 +1048,7 @@ void() W_Attack =
 		player_light1();
 		self.attack_finished = time + 0.1;
 		sound (self, CHAN_AUTO, "weapons/lstart.wav", 1, ATTN_NORM);
+		//stuffcmd (self, "vibrate tactile/weapons/lstart.bnvib");
 	}
 };
 
@@ -1012,7 +1062,7 @@ void() W_ChangeWeapon =
 {
 	local	float	it, am, fl;
 	
-	it = self.items;
+	fl = it = self.items;
 	am = 0;
 	
 	if (self.impulse == 1)
@@ -1022,30 +1072,35 @@ void() W_ChangeWeapon =
 	else if (self.impulse == 2)
 	{
 		fl = IT_SHOTGUN;
+
 		if (self.ammo_shells < 1)
 			am = 1;
 	}
 	else if (self.impulse == 3)
 	{
 		fl = IT_SUPER_SHOTGUN;
+
 		if (self.ammo_shells < 2)
 			am = 1;
 	}		
 	else if (self.impulse == 4)
 	{
 		fl = IT_NAILGUN;
+
 		if (self.ammo_nails < 1)
 			am = 1;
 	}
 	else if (self.impulse == 5)
 	{
 		fl = IT_SUPER_NAILGUN;
+
 		if (self.ammo_nails < 2)
 			am = 1;
 	}
 	else if (self.impulse == 6)
 	{
 		fl = IT_GRENADE_LAUNCHER;
+
 		if (self.ammo_rockets < 1)
 			am = 1;
 	}
@@ -1066,13 +1121,13 @@ void() W_ChangeWeapon =
 	
 	if (!(self.items & fl))
 	{	// don't have the weapon or the ammo
-		sprint (self, "no weapon.\n");
+		sprint (self, "$qc_no_weapon");
 		return;
 	}
 	
 	if (am)
 	{	// don't have the ammo
-		sprint (self, "not enough ammo.\n");
+		sprint (self, "$qc_not_enough_ammo");
 		return;
 	}
 
@@ -1088,10 +1143,11 @@ void() W_ChangeWeapon =
 CheatCommand
 ============
 */
-void() CheatCommand =
-{
-	if (deathmatch || coop)
+void CheatCommand() {
+
+	if ( ( deathmatch || coop ) && cheats_allowed == 0 ) { // mal: allow impulse 9 IF cheats allowed
 		return;
+	}
 
 	self.ammo_rockets = 100;
 	self.ammo_nails = 200;
@@ -1108,6 +1164,11 @@ void() CheatCommand =
 
 	self.ammo_cells = 200;
 	self.items = self.items | IT_LIGHTNING;
+	
+	// mal: also give full armor...
+	self.armortype = 0.8;
+	self.armorvalue = 200;
+	self.items = self.items - ( self.items & ( IT_ARMOR1 | IT_ARMOR2 | IT_ARMOR3 ) ) + IT_ARMOR3;
 
 	self.weapon = IT_ROCKET_LAUNCHER;
 	self.impulse = 0;
@@ -1139,54 +1200,61 @@ void() CycleWeaponCommand =
 		else if (self.weapon == IT_AXE)
 		{
 			self.weapon = IT_SHOTGUN;
+
 			if (self.ammo_shells < 1)
 				am = 1;
 		}
 		else if (self.weapon == IT_SHOTGUN)
 		{
 			self.weapon = IT_SUPER_SHOTGUN;
+
 			if (self.ammo_shells < 2)
 				am = 1;
 		}		
 		else if (self.weapon == IT_SUPER_SHOTGUN)
 		{
 			self.weapon = IT_NAILGUN;
+
 			if (self.ammo_nails < 1)
 				am = 1;
 		}
 		else if (self.weapon == IT_NAILGUN)
 		{
 			self.weapon = IT_SUPER_NAILGUN;
+
 			if (self.ammo_nails < 2)
 				am = 1;
 		}
 		else if (self.weapon == IT_SUPER_NAILGUN)
 		{
 			self.weapon = IT_GRENADE_LAUNCHER;
+
 			if (self.ammo_rockets < 1)
 				am = 1;
 		}
 		else if (self.weapon == IT_GRENADE_LAUNCHER)
 		{
 			self.weapon = IT_ROCKET_LAUNCHER;
+
 			if (self.ammo_rockets < 1)
 				am = 1;
 		}
 		else if (self.weapon == IT_ROCKET_LAUNCHER)
 		{
 			self.weapon = IT_LIGHTNING;
+
 			if (self.ammo_cells < 1)
 				am = 1;
 		}
 	
-		if ( (it & self.weapon) && am == 0)
+		if ( (self.items & self.weapon) && am == 0)
 		{
 			W_SetCurrentAmmo ();
 			return;
 		}
 	}
-
 };
+
 
 /*
 ============
@@ -1197,8 +1265,8 @@ Go to the prev weapon with ammo
 */
 void() CycleWeaponReverseCommand =
 {
-	local	float	it, am;
-	
+	local float it, am;
+
 	it = self.items;
 	self.impulse = 0;
 
@@ -1209,57 +1277,70 @@ void() CycleWeaponReverseCommand =
 		if (self.weapon == IT_LIGHTNING)
 		{
 			self.weapon = IT_ROCKET_LAUNCHER;
+
 			if (self.ammo_rockets < 1)
-				am = 1;
+			am = 1;
 		}
+	
 		else if (self.weapon == IT_ROCKET_LAUNCHER)
 		{
 			self.weapon = IT_GRENADE_LAUNCHER;
+
 			if (self.ammo_rockets < 1)
-				am = 1;
+			am = 1;
 		}
+
 		else if (self.weapon == IT_GRENADE_LAUNCHER)
 		{
 			self.weapon = IT_SUPER_NAILGUN;
+
 			if (self.ammo_nails < 2)
-				am = 1;
+			am = 1;
 		}
+
 		else if (self.weapon == IT_SUPER_NAILGUN)
 		{
 			self.weapon = IT_NAILGUN;
+
 			if (self.ammo_nails < 1)
-				am = 1;
+			am = 1;
 		}
+
 		else if (self.weapon == IT_NAILGUN)
 		{
 			self.weapon = IT_SUPER_SHOTGUN;
+
 			if (self.ammo_shells < 2)
-				am = 1;
-		}		
+			am = 1;
+		}
+
 		else if (self.weapon == IT_SUPER_SHOTGUN)
 		{
 			self.weapon = IT_SHOTGUN;
+
 			if (self.ammo_shells < 1)
-				am = 1;
+			am = 1;
 		}
+
 		else if (self.weapon == IT_SHOTGUN)
 		{
 			self.weapon = IT_AXE;
 		}
+
 		else if (self.weapon == IT_AXE)
 		{
 			self.weapon = IT_LIGHTNING;
+
 			if (self.ammo_cells < 1)
-				am = 1;
+			am = 1;
 		}
-	
+
 		if ( (it & self.weapon) && am == 0)
 		{
 			W_SetCurrentAmmo ();
 			return;
 		}
 	}
-
 };
 
 /*
@@ -1278,6 +1359,7 @@ void() QuadCheat =
 {
 	if (deathmatch || coop)
 		return;
+
 	self.super_time = 1;
 	self.super_damage_finished = time + 30;
 	self.items = self.items | IT_QUAD;
@@ -1294,7 +1376,6 @@ void() ImpulseCommands =
 {
 	if (self.impulse >= 1 && self.impulse <= 8)
 		W_ChangeWeapon ();
-
 	if (self.impulse == 9)
 		CheatCommand ();
 	if (self.impulse == 10)
@@ -1302,8 +1383,7 @@ void() ImpulseCommands =
 	if (self.impulse == 11)
 		ServerflagsCommand ();
 	if (self.impulse == 12)
-		CycleWeaponReverseCommand ();
-
+		CycleWeaponReverseCommand();
 	if (self.impulse == 255)
 		QuadCheat ();
 		
@@ -1319,14 +1399,15 @@ Called every frame so impulse events can be handled as well as possible
 */
 void() W_WeaponFrame =
 {
-	if (time < self.attack_finished)
+	if ( time < self.attack_finished ) {
 		return;
+	}
 
-	ImpulseCommands ();
+	if (self.impulse)
+		ImpulseCommands ();
 	
-// check for attack
-	if (self.button0)
-	{
+	// check for attack
+	if ( self.button0 ) {
 		SuperDamageSound ();
 		W_Attack ();
 	}
@@ -1351,5 +1432,3 @@ void() SuperDamageSound =
 	}
 	return;
 };
-
-
